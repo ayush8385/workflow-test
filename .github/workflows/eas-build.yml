@@ -32,27 +32,27 @@ on:
 
 jobs:
   android-apk-build:
-    if: ${{ true }}
+    if: ${{ inputs.trigger_android_apk_distribution }}
     uses: ./.github/workflows/eas-android-build.yml
     with:
-      build_flavor: staging
+      build_flavor: ${{ inputs.build_flavor }}
       build_distribution: apk
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   android-playstore-build:
-    if: ${{ false }}
+    if: ${{ inputs.trigger_android_playstore_distribution }}
     uses: ./.github/workflows/eas-android-build.yml
     with:
-      build_flavor: staging
+      build_flavor: ${{ inputs.build_flavor }}
       build_distribution: playstore
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   ios-build:
-    if: ${{ true }} # Always run this job
+    if: ${{ inputs.trigger_ios_app_distribution }}
     uses: ./.github/workflows/eas-ios-build.yml
     with:
-      build_flavor: staging
+      build_flavor: ${{ inputs.build_flavor }}
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
