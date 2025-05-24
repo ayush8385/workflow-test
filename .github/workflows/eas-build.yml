@@ -1,0 +1,58 @@
+name: EAS-Build
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  # pull_request:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+    inputs:
+      build_flavor:
+        description: "Select Build Flavor"
+        required: true
+        type: choice
+        default: staging
+        options:
+          - production
+          - staging
+      trigger_android_apk_distribution:
+        description: "Android APK Distribution"
+        type: boolean
+        default: true
+      trigger_android_playstore_distribution:
+        description: "Android Play Store Distribution"
+        type: boolean
+        default: false
+      trigger_ios_app_distribution:
+        description: "iOS App Distribution"
+        type: boolean
+        default: true
+
+jobs:
+  android-apk-build:
+    if: ${{ true }}
+    uses: ./.github/workflows/eas-android-build.yml
+    with:
+      build_flavor: staging
+      build_distribution: apk
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  android-playstore-build:
+    if: ${{ false }}
+    uses: ./.github/workflows/eas-android-build.yml
+    with:
+      build_flavor: staging
+      build_distribution: playstore
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  ios-build:
+    if: ${{ true }} # Always run this job
+    uses: ./.github/workflows/eas-ios-build.yml
+    with:
+      build_flavor: staging
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

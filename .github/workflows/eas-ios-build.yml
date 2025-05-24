@@ -1,0 +1,63 @@
+name: iOS Build
+
+on:
+  workflow_call:
+    inputs:
+      build_flavor:
+        type: string
+        default: staging
+    secrets:
+      NPM_TOKEN:
+        required: true
+
+  workflow_dispatch:
+    inputs:
+      build_flavor:
+        description: "Build flavor"
+        required: false
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  ios-build:
+    runs-on: keystone-runner-ios
+    steps:
+      - name: Clean working directory
+        shell: bash
+        run: |
+          echo "🧹 Cleaning up previous run"
+          sudo chown -R $USER /Users/$USER/keystone-actions-runner/_keystone_work/keystone/
+          rm -rf "${{ github.workspace }}"
+          mkdir "${{ github.workspace }}"
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and Yarn
+        uses: ./.github/actions/setup
+        with:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Setup Ruby
+        run: |
+          ruby -v
+          rvm list
+          rvm use ruby-3.2.2 --default
+
+      - name: Run iOS build
+        id: build
+        env:
+          EAS_LOCAL_BUILD: true
+          EXPO_TOKEN: 5oPgsw8-tg2cP3JeoR9IRrhoCI-EQt2-qoAJrFJk
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          APP_ENV: ${{ inputs.build_flavor }}
+          DISTRIBUTION: ios
+        run: |
+          echo "📦 Building IOS for ${{ env.APP_ENV }}-${{env.DISTRIBUTION}}"
+          yarn build:${{env.APP_ENV}}:${{env.DISTRIBUTION}}
+
+          mkdir -p build_outputs/ios
+          find . -type f \( -name "*.app" -o -name "*.ipa" -o -name "*.tar.gz" \) -exec cp {} build_outputs/ios/ \;
