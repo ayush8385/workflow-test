@@ -1,0 +1,85 @@
+name: Android Build
+
+on:
+  workflow_call:
+    inputs:
+      build_flavor:
+        type: string
+        default: staging
+      build_distribution:
+        type: string
+        default: apk
+    secrets:
+      NPM_TOKEN:
+        required: true
+
+#   workflow_dispatch:
+#     inputs:
+#       build_flavor:
+#         description: "Build flavor"
+#         required: false
+#         default: staging
+#         type: choice
+#         options:
+#           - staging
+#           - production
+#       build_distribution:
+#         description: "Distribution type"
+#         required: false
+#         default: apk
+#         type: choice
+#         options:
+#           - apk
+#           - playstore
+
+env:
+  APP_ENV: ${{ inputs.build_flavor }}
+  DISTRIBUTION: ${{ inputs.build_distribution }}
+
+jobs:
+  build:
+    name: Android Build – ${{ inputs.build_flavor }} / ${{ inputs.build_distribution }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and Yarn
+        uses: ./.github/actions/setup
+        with:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Build Android App
+        env:
+          EAS_LOCAL_BUILD: true
+          EXPO_TOKEN: 5oPgsw8-tg2cP3JeoR9IRrhoCI-EQt2-qoAJrFJk
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "📦 Building Android for ${{ env.APP_ENV }}-${{env.DISTRIBUTION}}"
+          yarn build:${{env.APP_ENV}}:${{env.DISTRIBUTION}}
+
+          mkdir -p build_outputs/android
+          find . -type f \( -name "*.apk" -o -name "*.aab" \) -exec cp {} build_outputs/android/ \;
+
+      - name: Send Build to Slack
+        env:
+          SLACK_TOKEN: C08KF0YV0UT
+          SLACK_CHANNEL: C08KF0YV0UT
+        run: |
+          echo "📁 Searching for APK or AAB to send..."
+          FILE_PATH=$(find build_outputs/android -type f \( -name "*.apk" -o -name "*.aab" \) | head -n 1)
+
+          if [ -z "$FILE_PATH" ]; then
+            echo "❌ No APK or AAB file found."
+            exit 1
+          fi
+
+          echo "📤 Uploading $FILE_PATH to Slack..."
+          curl -F file=@"$FILE_PATH" \
+               -F "initial_comment=✅ Android *${{ env.APP_ENV }}-${{ env.DISTRIBUTION }}* build completed and is ready to download." \
+               -F channels=$SLACK_CHANNEL \
+               -H "Authorization: Bearer $SLACK_TOKEN" \
+               https://slack.com/api/files.upload
