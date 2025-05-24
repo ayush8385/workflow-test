@@ -23,7 +23,7 @@ on:
 
 jobs:
   ios-build:
-    name: iOS Build(${{ inputs.build_flavor }})
+    name: ${{ inputs.build_flavor }}
     runs-on: keystone-runner-ios
     steps:
       - name: Clean working directory
