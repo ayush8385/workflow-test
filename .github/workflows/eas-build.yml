@@ -1,34 +1,34 @@
 name: EAS-Build
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-  # workflow_dispatch:
-  #   inputs:
-  #     build_flavor:
-  #       description: "Select Build Flavor"
-  #       required: true
-  #       type: choice
-  #       default: staging
-  #       options:
-  #         - production
-  #         - staging
-  #     trigger_android_apk_distribution:
-  #       description: "Android APK Distribution"
-  #       type: boolean
-  #       default: true
-  #     trigger_android_playstore_distribution:
-  #       description: "Android Play Store Distribution"
-  #       type: boolean
-  #       default: false
-  #     trigger_ios_app_distribution:
-  #       description: "iOS App Distribution"
-  #       type: boolean
-  #       default: true
+  # push:
+  #   branches:
+  #     - main
+  # pull_request:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+    inputs:
+      build_flavor:
+        description: "Select Build Flavor"
+        required: true
+        type: choice
+        default: staging
+        options:
+          - production
+          - staging
+      trigger_android_apk_distribution:
+        description: "Android APK Distribution"
+        type: boolean
+        default: true
+      trigger_android_playstore_distribution:
+        description: "Android Play Store Distribution"
+        type: boolean
+        default: false
+      trigger_ios_app_distribution:
+        description: "iOS App Distribution"
+        type: boolean
+        default: true
 
 jobs:
   android-apk-build:

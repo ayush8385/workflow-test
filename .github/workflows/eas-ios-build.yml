@@ -10,16 +10,16 @@ on:
       NPM_TOKEN:
         required: true
 
-#   workflow_dispatch:
-#     inputs:
-#       build_flavor:
-#         description: "Build flavor"
-#         required: false
-#         default: staging
-#         type: choice
-#         options:
-#           - staging
-#           - production
+  workflow_dispatch:
+    inputs:
+      build_flavor:
+        description: "Build flavor"
+        required: false
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
 
 jobs:
   ios-build:

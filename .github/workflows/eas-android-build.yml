@@ -13,24 +13,24 @@ on:
       NPM_TOKEN:
         required: true
 
-#   workflow_dispatch:
-#     inputs:
-#       build_flavor:
-#         description: "Build flavor"
-#         required: false
-#         default: staging
-#         type: choice
-#         options:
-#           - staging
-#           - production
-#       build_distribution:
-#         description: "Distribution type"
-#         required: false
-#         default: apk
-#         type: choice
-#         options:
-#           - apk
-#           - playstore
+  workflow_dispatch:
+    inputs:
+      build_flavor:
+        description: "Build flavor"
+        required: false
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
+      build_distribution:
+        description: "Distribution type"
+        required: false
+        default: apk
+        type: choice
+        options:
+          - apk
+          - playstore
 
 env:
   APP_ENV: ${{ inputs.build_flavor }}
