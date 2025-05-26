@@ -11,41 +11,54 @@ on:
         options:
           - production
           - staging
+
       trigger_android_apk_distribution:
-        description: "Android APK Distribution"
+        description: "Run Android APK build"
         type: boolean
         default: true
+
       trigger_android_playstore_distribution:
-        description: "Android Play Store Distribution"
+        description: "Run Android Play Store build"
         type: boolean
         default: false
+
       trigger_ios_app_distribution:
-        description: "iOS App Distribution"
+        description: "Run iOS build"
         type: boolean
         default: true
 
 jobs:
-  android-build:
-    name: Android Build - ${{ matrix.build_distribution }}
-    strategy:
-      matrix:
-        build_distribution: [apk, playstore]
-    if: >
-      (matrix.build_distribution == 'apk' && github.event.inputs.trigger_android_apk_distribution == 'true') ||
-      (matrix.build_distribution == 'playstore' && github.event.inputs.trigger_android_playstore_distribution == 'true')
+  # ──────────────────────────────────────────────────────────────
+  android-apk:
+    name: Android APK Build
+    if: ${{ github.event.inputs.trigger_android_apk_distribution == 'true' }}
     uses: ./.github/workflows/eas-android-build.yml
     with:
-      build_flavor: ${{ github.event.inputs.build_flavor }}
-      build_distribution: ${{ matrix.build_distribution }}
+      build_flavor:      ${{ github.event.inputs.build_flavor }}
+      build_distribution: apk
     secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      NPM_TOKEN:   ${{ secrets.NPM_TOKEN }}
       SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
 
+  # ──────────────────────────────────────────────────────────────
+  android-playstore:
+    name: Android Play Store Build
+    if: ${{ github.event.inputs.trigger_android_playstore_distribution == 'true' }}
+    uses: ./.github/workflows/eas-android-build.yml
+    with:
+      build_flavor:      ${{ github.event.inputs.build_flavor }}
+      build_distribution: playstore
+    secrets:
+      NPM_TOKEN:   ${{ secrets.NPM_TOKEN }}
+      SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+
+  # ──────────────────────────────────────────────────────────────
   ios-build:
+    name: iOS Build
     if: ${{ github.event.inputs.trigger_ios_app_distribution == 'true' }}
     uses: ./.github/workflows/eas-ios-build.yml
     with:
       build_flavor: ${{ github.event.inputs.build_flavor }}
     secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      NPM_TOKEN:   ${{ secrets.NPM_TOKEN }}
       SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
