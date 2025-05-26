@@ -9,6 +9,8 @@ on:
     secrets:
       NPM_TOKEN:
         required: true
+      SLACK_TOKEN:
+        required: true
 
   workflow_dispatch:
     inputs:
@@ -57,8 +59,19 @@ jobs:
           APP_ENV: ${{ inputs.build_flavor }}
           DISTRIBUTION: ios
         run: |
-          echo "📦 Building IOS for ${{ env.APP_ENV }}-${{env.DISTRIBUTION}}"
+          echo "📦 Building iOS for ${{ env.APP_ENV }}-${{env.DISTRIBUTION}}"
           yarn build:${{env.APP_ENV}}:${{env.DISTRIBUTION}}
 
-          mkdir -p build_outputs/ios
-          find . -type f \( -name "*.app" -o -name "*.ipa" -o -name "*.tar.gz" \) -exec cp {} build_outputs/ios/ \;
+          FILE_PATH=$(find . -type f \( -name "*.app" -o -name "*.ipa" -o -name "*.tar.gz" \) | head -n 1)
+          echo "FILE_PATH=${FILE_PATH}" >> $GITHUB_OUTPUT
+
+      - name: Send Build to Slack
+        uses: ./.github/actions/slack-alert
+        with:
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+          SLACK_CHANNEL: ${{ vars.IOS_BUILDS_CHANNEL }}
+          WORKFLOW_NAME: "iOS Build"
+          WORKFLOW_STATUS: ${{ job.status }}
+          BUILD_FLAVOR: ${{inputs.build_flavor}}
+          BRANCH_NAME: ${{ github.head_ref }}
+          FILE_PATH: ${{ steps.build.outputs.FILE_PATH }}

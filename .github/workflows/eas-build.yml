@@ -1,12 +1,6 @@
-name: EAS-Build
+name: Trigger Build
 
 on:
-  # push:
-  #   branches:
-  #     - main
-  # pull_request:
-  #   branches:
-  #     - main
   workflow_dispatch:
     inputs:
       build_flavor:
@@ -31,28 +25,29 @@ on:
         default: true
 
 jobs:
-  android-apk-build:
-    if: ${{ inputs.trigger_android_apk_distribution }}
+  jobs:
+  android-build:
+    name: Android Build - ${{ matrix.build_distribution }}
+    strategy:
+      matrix:
+        build_distribution: [apk, playstore]
+    if: |
+      (matrix.build_distribution == 'apk' && inputs.trigger_android_apk_distribution == true) ||
+      (matrix.build_distribution == 'playstore' && inputs.trigger_android_playstore_distribution == true)
     uses: ./.github/workflows/eas-android-build.yml
     with:
       build_flavor: ${{ inputs.build_flavor }}
-      build_distribution: apk
+      build_distribution: ${{ matrix.build_distribution }}
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
 
-  android-playstore-build:
-    if: ${{ inputs.trigger_android_playstore_distribution }}
-    uses: ./.github/workflows/eas-android-build.yml
-    with:
-      build_flavor: ${{ inputs.build_flavor }}
-      build_distribution: playstore
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   ios-build:
-    if: ${{ inputs.trigger_ios_app_distribution }}
+    if: ${{ true }}
     uses: ./.github/workflows/eas-ios-build.yml
     with:
-      build_flavor: ${{ inputs.build_flavor }}
+      build_flavor: staging
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
