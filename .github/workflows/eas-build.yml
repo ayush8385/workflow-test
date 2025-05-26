@@ -31,8 +31,8 @@ jobs:
       matrix:
         build_distribution: [apk, playstore]
     if: |
-      (matrix.build_distribution == 'apk' && inputs.trigger_android_apk_distribution == true) ||
-      (matrix.build_distribution == 'playstore' && inputs.trigger_android_playstore_distribution == true)
+      (${{matrix.build_distribution}} == 'apk' && ${{inputs.trigger_android_apk_distribution}} == true) ||
+      (${{matrix.build_distribution}} == 'playstore' && ${{inputs.trigger_android_playstore_distribution}} == true)
     uses: ./.github/workflows/eas-android-build.yml
     with:
       build_flavor: ${{ inputs.build_flavor }}
