@@ -25,7 +25,6 @@ on:
         default: true
 
 jobs:
-  jobs:
   android-build:
     name: Android Build - ${{ matrix.build_distribution }}
     strategy:
