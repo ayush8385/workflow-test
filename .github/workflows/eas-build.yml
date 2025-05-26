@@ -30,23 +30,22 @@ jobs:
     strategy:
       matrix:
         build_distribution: [apk, playstore]
-    if: |
-      (${{matrix.build_distribution}} == 'apk' && ${{inputs.trigger_android_apk_distribution}} == true) ||
-      (${{matrix.build_distribution}} == 'playstore' && ${{inputs.trigger_android_playstore_distribution}} == true)
+    if: >
+      (matrix.build_distribution == 'apk' && github.event.inputs.trigger_android_apk_distribution == 'true') ||
+      (matrix.build_distribution == 'playstore' && github.event.inputs.trigger_android_playstore_distribution == 'true')
     uses: ./.github/workflows/eas-android-build.yml
     with:
-      build_flavor: ${{ inputs.build_flavor }}
+      build_flavor: ${{ github.event.inputs.build_flavor }}
       build_distribution: ${{ matrix.build_distribution }}
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
 
-
   ios-build:
-    if: ${{ true }}
+    if: ${{ github.event.inputs.trigger_ios_app_distribution == 'true' }}
     uses: ./.github/workflows/eas-ios-build.yml
     with:
-      build_flavor: staging
+      build_flavor: ${{ github.event.inputs.build_flavor }}
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
