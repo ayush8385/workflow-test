@@ -1,8 +1,12 @@
-name: Trigger Build
+name: App Distribution Pipeline
 
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: version(x.xx.x format)
+        type: string
+        default: "99.0.0"
       build_flavor:
         description: "Select Build Flavor"
         required: true
@@ -11,54 +15,63 @@ on:
         options:
           - production
           - staging
-
-      trigger_android_apk_distribution:
-        description: "Run Android APK build"
+      trigger_android_apk_dev_build:
+        description: "Android APK Dev Build"
         type: boolean
         default: true
-
-      trigger_android_playstore_distribution:
-        description: "Run Android Play Store build"
+      trigger_android_playstore_dev_build:
+        description: "Android Play Store Dev Build"
         type: boolean
         default: false
-
-      trigger_ios_app_distribution:
-        description: "Run iOS build"
+      trigger_ios_app_dev_build:
+        description: "iOS App Dev Build"
+        type: boolean
+        default: true
+      trigger_android_playstore_release_build:
+        description: "Android Play Store Release Build"
+        type: boolean
+        default: false
+      trigger_ios_app_release_build:
+        description: "iOS AppStore Build"
+        type: boolean
+        default: true
+      trigger_ios_app_firebase_distribution_build:
+        description: "iOS App Distribution Build"
         type: boolean
         default: true
 
 jobs:
-  # ──────────────────────────────────────────────────────────────
-  android-apk:
-    name: Android APK Build
-    if: ${{ github.event.inputs.trigger_android_apk_distribution == 'true' }}
-    uses: ./.github/workflows/eas-android-build.yml
+  android-apk-build:
+    if: ${{ inputs.trigger_android_apk_dev_build }}
+    uses: ./.github/workflows/trigger-android-build.yml
     with:
-      build_flavor:      ${{ github.event.inputs.build_flavor }}
+      version: ${{ inputs.version }}
+      build_flavor: ${{ inputs.build_flavor }}
       build_distribution: apk
     secrets:
-      NPM_TOKEN:   ${{ secrets.NPM_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-  # ──────────────────────────────────────────────────────────────
-  android-playstore:
-    name: Android Play Store Build
-    if: ${{ github.event.inputs.trigger_android_playstore_distribution == 'true' }}
-    uses: ./.github/workflows/eas-android-build.yml
+  android-playstore-build:
+    if: ${{ inputs.trigger_android_playstore_dev_build }}
+    uses: ./.github/workflows/trigger-android-build.yml
     with:
-      build_flavor:      ${{ github.event.inputs.build_flavor }}
+      version: ${{ inputs.version }}
+      build_flavor: ${{ inputs.build_flavor }}
       build_distribution: playstore
     secrets:
-      NPM_TOKEN:   ${{ secrets.NPM_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-  # ──────────────────────────────────────────────────────────────
   ios-build:
-    name: iOS Build
-    if: ${{ github.event.inputs.trigger_ios_app_distribution == 'true' }}
-    uses: ./.github/workflows/eas-ios-build.yml
+    if: ${{ inputs.trigger_ios_app_dev_build }}
+    uses: ./.github/workflows/trigger-ios-build.yml
     with:
-      build_flavor: ${{ github.event.inputs.build_flavor }}
+      version: ${{ inputs.version }}
+      build_flavor: ${{ inputs.build_flavor }}
     secrets:
-      NPM_TOKEN:   ${{ secrets.NPM_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
