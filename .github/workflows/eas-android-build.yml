@@ -1,8 +1,12 @@
-name: Android Build
+name: Trigger Android Build
 
 on:
   workflow_call:
     inputs:
+      version:
+        type: string
+        description: "Enter app version"
+        required: true
       build_flavor:
         type: string
         default: staging
@@ -14,9 +18,15 @@ on:
         required: true
       SLACK_TOKEN:
         required: true
+      EXPO_TOKEN:
+        required: true
 
   workflow_dispatch:
     inputs:
+      version:
+        description: "Enter app version"
+        required: true
+        default: "99.0.0"
       build_flavor:
         description: "Build flavor"
         required: false
@@ -51,15 +61,13 @@ jobs:
         with:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Install EAS CLI
-        run: npm install -g eas-cli
-
       - name: Build Android App
         id: build
         env:
           EAS_LOCAL_BUILD: true
-          EXPO_TOKEN: 5oPgsw8-tg2cP3JeoR9IRrhoCI-EQt2-qoAJrFJk
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VERSION: ${{ inputs.version }}
         run: |
           echo "📦 Building Android for ${{ env.APP_ENV }}-${{env.DISTRIBUTION}}"
           yarn build:${{env.APP_ENV}}:${{env.DISTRIBUTION}}
@@ -70,10 +78,10 @@ jobs:
       - name: Send Build to Slack
         uses: ./.github/actions/slack-alert
         with:
+          VERSION: ${{ inputs.version }}
           SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
           SLACK_CHANNEL: ${{ vars.ANDROID_BUILDS_CHANNEL }}
           WORKFLOW_NAME: "${{inputs.build_distribution}} Build"
-          WORKFLOW_STATUS: ${{ job.status }}
           BUILD_FLAVOR: ${{inputs.build_flavor}}
           BRANCH_NAME: ${{ github.head_ref }}
           FILE_PATH: ${{ steps.build.outputs.FILE_PATH }}
