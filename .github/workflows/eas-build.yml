@@ -28,15 +28,18 @@ on:
         type: boolean
         default: true
       trigger_android_playstore_release_build:
+        if: ${{ build_flavor == 'production' }}
         description: "Android Play Store Release Build"
         type: boolean
         default: false
       trigger_ios_app_release_build:
-        description: "iOS AppStore Build"
+        if: ${{ build_flavor == 'production' }}
+        description: "iOS App Release Build"
         type: boolean
         default: true
       trigger_ios_app_firebase_distribution_build:
-        description: "iOS App Distribution Build"
+        if: ${{ build_flavor == 'production' }}
+        description: "iOS App Release Build"
         type: boolean
         default: true
 
