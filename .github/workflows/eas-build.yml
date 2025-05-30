@@ -18,7 +18,7 @@ on:
       trigger_android_apk_dev_build:
         description: "Android APK Dev Build"
         type: boolean
-        default: true
+        default: false
       trigger_android_playstore_dev_build:
         description: "Android Play Store Dev Build"
         type: boolean
@@ -26,22 +26,22 @@ on:
       trigger_ios_app_dev_build:
         description: "iOS App Dev Build"
         type: boolean
-        default: true
+        default: false
       trigger_android_playstore_release_build:
-        if: ${{ build_flavor == 'production' }}
+        if: ${{ github.event.inputs.build_flavor == 'production' }}
         description: "Android Play Store Release Build"
         type: boolean
         default: false
       trigger_ios_app_release_build:
-        if: ${{ build_flavor == 'production' }}
+        if: ${{ github.event.inputs.build_flavor == 'production' }}
         description: "iOS App Release Build"
         type: boolean
-        default: true
+        default: false
       trigger_ios_app_firebase_distribution_build:
-        if: ${{ build_flavor == 'production' }}
-        description: "iOS App Release Build"
+        if: ${{ github.event.inputs.build_flavor == 'production' }}
+        description: "iOS Firebase Distribution Build"
         type: boolean
-        default: true
+        default: false
 
 jobs:
   android-apk-build:
